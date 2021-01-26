@@ -223,12 +223,11 @@ main() {
 		--cd "$(dirname "${config}")" \
 		--config "${config}" \
 		--dev "${tun}" \
-		--errors-to-stderr &
+		--errors-to-stderr \
+		--daemon \
+		--writepid "openvpn.pid"
 
-	openvpn_pid=$(ps --ppid "$!" \
-		--format "pid" \
-		--no-headers
-	)
+	openvpn_pid=$(<$(dirname "${config}")/openvpn.pid)
 
 	>&2 printf "waiting for openvpn (pid = %d)\n" "${openvpn_pid}"
 
