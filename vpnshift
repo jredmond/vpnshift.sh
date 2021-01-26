@@ -19,6 +19,7 @@ usage="usage: vpnshift -c <config> [<command> [<arg>...]]
 optional:
 	-u <user>      Execute <command> as <user>
 	-d             Toggle namespace debug shell
+	-a <up_file>   Path to file with username and password for openvpn
 
 if not otherwise specified:
 	- The command defaults to the user's shell (${SHELL}).
@@ -112,13 +113,15 @@ _debug=0
 
 main() {
 	local config=
+	local up_file=
 	local user="${SUDO_USER}"
-	while getopts "hdc:u:" opt; do
+	while getopts "hdc:u:a:" opt; do
 		case "${opt}" in
 			h) quick_die "${usage}" ;;
 			d) _debug=1 ;;
 			c) config="$(realpath "${OPTARG}")" ;;
 			u) user="${OPTARG}" ;;
+			a) up_file="$(realpath "${OPTARG}")" ;;
 			*) quick_die "unknown option: %s" "${opt}" ;;
 		esac
 	done
@@ -225,7 +228,8 @@ main() {
 		--dev "${tun}" \
 		--errors-to-stderr \
 		--daemon \
-		--writepid "openvpn.pid"
+		--writepid "openvpn.pid" \
+		$( [ ! -z "$up_file" ] && echo "--auth-user-pass ${up_file}" )
 
 	openvpn_pid=$(<$(dirname "${config}")/openvpn.pid)
 
@@ -238,7 +242,7 @@ main() {
 		sleep 0.2
 	done
 
-	sleep 5
+	sleep 8
 
 	# Removing the default route protects from exposure if openvpn exits
 	# prematurely.
