@@ -238,6 +238,8 @@ main() {
 		sleep 0.2
 	done
 
+	sleep 5
+
 	# Removing the default route protects from exposure if openvpn exits
 	# prematurely.
 	must nsdo ip \
